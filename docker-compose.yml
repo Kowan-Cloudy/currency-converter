@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Next.js Application
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - EXCHANGE_RATE_API_KEY=${EXCHANGE_RATE_API_KEY}
+    restart: unless-stopped
+    networks:
+      - cloudy-network
+
+  # Local PostgreSQL for development only
+  # Comment out or remove this when using AWS RDS
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: localpassword
+      POSTGRES_DB: currency_converter
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - cloudy-network
+
+networks:
+  cloudy-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
